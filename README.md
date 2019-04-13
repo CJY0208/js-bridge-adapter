@@ -437,7 +437,7 @@ let globalFuncName = globalize(localFunc)
 window[globalFuncName](1, 2) // 3
 globalFuncName in window // true
 
-// 自定义转转为全局函数后的函数名
+// 自定义转为全局函数后的函数名
 let customizedGlobalFuncName = globalize(localFunc, {
   name: 'test'
 })

@@ -1,3 +1,4 @@
+import { isString, isFunction } from './is'
 import uniqueId from './uniqueId'
 
 const getGlobal = () => {
@@ -19,18 +20,20 @@ const globalize = (
   handler,
   { name = uniqueId('__globalFunction'), once = false } = {}
 ) => {
-  if (typeof handler === 'string') {
+  if (isString(handler)) {
     return handler
   }
 
   globalThis[name] = (...args) => {
-    if (typeof handler === 'function') {
-      handler(...args)
-    }
-
     if (once) {
       delete globalThis[name]
     }
+
+    if (isFunction(handler)) {
+      return handler(...args)
+    }
+
+    return
   }
 
   return name
