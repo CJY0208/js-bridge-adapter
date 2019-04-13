@@ -369,3 +369,85 @@ bridge.call('test', 1, 2) // log '2 1
 version = '1.3.3'
 bridge.support('test') // false 因为版本号条件未满足
 ```
+
+- - -
+
+## 其他功能
+
+### **`bridge.has(apiName)`**
+
+检测 `bridge` 中某交互是否已注册
+
+```javascript
+...
+bridge.register({
+  test: bridge.api('androidTest')
+})
+bridge.has('test') // true
+bridge.has('test2') // false
+...
+```
+
+### **`bridge.get(apiName)`**
+
+获取 `bridge` 中交互的执行体
+
+```javascript
+...
+bridge.register({
+  test: new Api((a, b) => a + b)
+})
+
+const test = bridge.get('test')
+
+test.isSupported() // true
+test(1, 2) // 3
+```
+
+### **`uniqueId([prefix = ''])`**
+
+随机 id 值，
+
+```javascript
+import { uniqueId } from 'jsbridge-adapter'
+```
+
+生成规则如下
+
+
+```javascript
+let uuid = 0
+
+const uniqueId = (prefix = '') =>
+  `${prefix}_${++uuid}_${Date.now()}_${Math.floor(Math.random() * 1000000)}`
+```
+
+
+### **`globalize(localFunc[, config])`**
+
+将局部函数转为全局函数，执行后得到生成的全局函数名，默认全局函数名通过 `uniqueId()` 生成
+
+```javascript
+import { globalize } from 'jsbridge-adapter'    
+
+let localFunc = (a, b) => a + b
+
+// 转换为全局函数后默认执行后不会自动销毁
+let globalFuncName = globalize(localFunc)
+window[globalFuncName](1, 2) // 3
+globalFuncName in window // true
+
+// 自定义转转为全局函数后的函数名
+let customizedGlobalFuncName = globalize(localFunc, {
+  name: 'test'
+})
+customizedGlobalFuncName === 'test' // true
+window.test(1, 2) // 3
+
+// 声明全局函数仅执行一次后自动销毁
+let globalFuncName2 = globalize(localFunc, {
+  once: true
+})
+window[globalFuncName2](1, 2) // 3
+globalFuncName2 in window // false
+```
