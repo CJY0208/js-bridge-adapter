@@ -1,4 +1,4 @@
-const isFunction = value => typeof value === 'function'
+import { isFunction } from '../helpers/is'
 const parseConfig = config => {
   if (typeof config === 'function') {
     return {
@@ -48,10 +48,10 @@ export default class DynamicFunction {
         return executor.length
       }
     })
-    
+
     func.getExecutor = getExecutor
     func.isExecutable = function(...args) {
-      return isFunction(getExecutor.apply(this, ...args))
+      return isFunction(getExecutor.apply(this, args))
     }
 
     return func

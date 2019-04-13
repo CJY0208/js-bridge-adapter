@@ -1,6 +1,6 @@
 import { get } from '../helpers/try'
 import { isFunction } from '../helpers/is'
-import DynamicFunction from './DynamicFunction'
+import DynamicFunction from '../helpers/DynamicFunction'
 
 const parseConfig = config => {
   if (typeof config === 'function') {
@@ -24,7 +24,7 @@ export default class Api {
       isSupported = Api.default.isSupported,
       name = get(runner, 'name'),
       getRunner: getExecutor = () =>
-        isFunction(runner) && isSupported() ? runner : false
+        isFunction(runner) && isSupported() ? runner : undefined
     } = parseConfig(config)
 
     const func = new DynamicFunction({

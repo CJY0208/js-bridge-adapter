@@ -33,10 +33,10 @@ window.AndroidBridge = {
 }
 ```
 
-使用桥接器的对接代码如下
+使用适配器的对接代码如下
 
 ```javascript
-import Bridge from '@JsBridgeAdapter'
+import Bridge from 'jsbridge-adapter'
 
 const bridge = new Bridge('android')
 
@@ -183,7 +183,7 @@ dynamicFunc(1, 2) // 无反应
 
 ```javascript
 ...
-import { Api } from '@JsBridgeAdapter'
+import { Api } from 'jsbridge-adapter'
 ...
 
 const test = new Api((a, b) => a + b)
@@ -202,7 +202,7 @@ bridge.call('test', 1, 2) // 3
 
 ```javascript
 ...
-import { Api } from '@JsBridgeAdapter'
+import { Api } from 'jsbridge-adapter'
 ...
 // 假设 bridge 未就绪
 
@@ -292,8 +292,10 @@ test(1, 2) // 3
 首先，我们仅控制接口的支持性，不改变接口的行为
 
 ```javascript
+...
 import compareVerions from 'compare-versions'
-import { Api } from '@JsBridgeAdapter'
+import { Api } from 'jsbridge-adapter'
+...
 
 // 此处假设原生版本号
 let version = '1.0.1'
@@ -355,7 +357,7 @@ bridge.register({
 bridge.support('test') // false，因为 bridge 未就绪
 
 bridge.ready()
-bridge.support('test') // false 因为版本号条件为满足
+bridge.support('test') // false 因为版本号条件未满足
 
 version = '1.2.0'
 bridge.support('test') // true
@@ -365,5 +367,5 @@ version = '1.2.6'
 bridge.call('test', 1, 2) // log '2 1
 
 version = '1.3.3'
-bridge.support('test') // false 因为版本号条件为满足
+bridge.support('test') // false 因为版本号条件未满足
 ```

@@ -1,21 +1,33 @@
-import { run } from '../helpers/try'
+import { get, run } from '../helpers/try'
 import { isFunction } from '../helpers/is'
-import globalize from '../helpers/globalize'
-import EventBus from '../helpers/eventBus'
+import EventBus from '../helpers/EventBus'
 import Api from './Api'
 
 export default class Bridge {
   static Api = Api
-  static globalize = globalize
+  static default = {
+    runAfterReady: false,
+    silent: false
+  }
 
   eventBus = new EventBus()
   isReady = false
-  configured = false
-  runAfterReady = false
   apis = {}
+  bridgeSupport = () => false
+  getRunner = () => () => undefined
+  runAfterReady = Bridge.default.runAfterReady
+  silent = Bridge.default.silent
 
   constructor(name = 'anonymous') {
     this.name = name
+  }
+
+  log = (level, ...args) => {
+    if (this.silent) {
+      return
+    }
+
+    run(console, level, ...args)
   }
 
   onReady = listener => {
@@ -28,25 +40,20 @@ export default class Bridge {
   }
 
   ready = () => {
-    if (this.isReady) {
-      return console.error(`[Warning] Bridge "${this.name}" is ready`)
-    }
-
     this.isReady = true
     this.eventBus.notify('ready')
+
+    return this
   }
 
-  config = ({ support, api: getRunner, runAfterReady = false } = {}) => {
-    if (this.configured) {
-      console.error(`[Warning] Bridge "${this.name}" has been configured`)
-      return this
-    }
+  config = ({ support, api, ...rest } = {}) =>
+    Object.assign(this, rest, {
+      getRunner: api,
+      bridgeSupport: support
+    })
 
-    this.bridgeSupport = support
-    this.getRunner = getRunner
-    this.runAfterReady = runAfterReady
-    this.configured = true
-
+  register = (apis = {}) => {
+    Object.assign(this.apis, run(apis, undefined, this.api))
     return this
   }
 
@@ -57,10 +64,10 @@ export default class Bridge {
     return !!isSupported
   }
 
-  api = (key, { runner = this.getRunner(key) } = {}) => {
+  api = (key, { getRunner = this.getRunner } = {}) => {
     const bridgeRunner = new Api({
       name: key,
-      runner,
+      runner: (...args) => run(getRunner(key), undefined, ...args),
       isSupported: () => {
         if (!this.isReady) {
           return false
@@ -72,21 +79,18 @@ export default class Bridge {
     bridgeRunner.isFromBridge = true
     bridgeRunner.customize = getCustomizedRunner =>
       this.api(key, {
-        runner: getCustomizedRunner(runner)
+        getRunner: () => getCustomizedRunner(getRunner(key))
       })
 
     return bridgeRunner
   }
 
-  register = (apis = {}) => {
-    Object.assign(this.apis, run(apis, undefined, this.api))
-    return this
-  }
-  has = key => !!this.apis[key]
-  get = key => this.apis[key]
+  has = key => key in this.apis
+  get = key => get(this.apis, key)
   call = (key, ...args) => {
     if (!this.has(key)) {
-      return console.warn(
+      return this.log(
+        'warn',
         `[Unregistered] Api "${key}" is unregistered in Bridge "${this.name}"`
       )
     }
@@ -96,7 +100,8 @@ export default class Bridge {
       const runner = run(api, `getRunner`)
 
       if (!isFunction(runner)) {
-        return console.warn(
+        return this.log(
+          'warn',
           `[Not Supported] Api "${key}" is not supported by Bridge "${
             this.name
           }`
@@ -113,7 +118,8 @@ export default class Bridge {
     if (this.runAfterReady) {
       return new Promise(resolve => this.onReady(() => resolve(exec())))
     } else {
-      return console.warn(
+      return this.log(
+        'warn',
         `[Not Ready] Bridge "${
           this.name
         }" is not ready, can't call Api "${key}"`
