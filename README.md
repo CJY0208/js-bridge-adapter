@@ -406,7 +406,7 @@ test(1, 2) // 3
 
 ### **`uniqueId([prefix = ''])`**
 
-随机 id 值，
+生成一个随机的、唯一的 id 值
 
 ```javascript
 import { uniqueId } from 'jsbridge-adapter'
