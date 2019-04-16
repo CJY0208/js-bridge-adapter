@@ -1,5 +1,5 @@
 {
-  "name": "jsbridge-adapter",
+  "name": "js-bridge-adapter",
   "version": "0.0.1",
   "description": "web 端 bridge 适配器，适用于对接任意 native 端 bridge 方案",
   "main": "index.js",
@@ -15,10 +15,10 @@
   ],
   "author": "CJY0208",
   "license": "ISC",
-  "homepage": "https://github.com/CJY0208/jsbridge-adapter",
+  "homepage": "https://github.com/CJY0208/js-bridge-adapter",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CJY0208/jsbridge-adapter.git"
+    "url": "git+https://github.com/CJY0208/js-bridge-adapter.git"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

@@ -2,6 +2,8 @@
 
 `web` 端 `bridge` 适配器，适用于对接任意 `native` 端 `bridge` 方案
 
+基于[动态函数](https://github.com/CJY0208/js-dynamic-function)制作
+
 - - -
 
 ## 目的
@@ -36,7 +38,7 @@ window.AndroidBridge = {
 使用适配器的对接代码如下
 
 ```javascript
-import Bridge from 'jsbridge-adapter'
+import Bridge from 'js-bridge-adapter'
 
 const bridge = new Bridge('android')
 
@@ -117,7 +119,7 @@ bridge.call('test3', 1, 2) // log '3, 5' 由下到上执行，所以并不是 '4
 
 ## <div id="customize" /> 自定义交互
 
-`Api` 是一个封装过后的动态函数，它具有更直观的参数名称
+`Api` 是一个简易优化过后的[动态函数](https://github.com/CJY0208/js-dynamic-function)，它具有比[动态函数](https://github.com/CJY0208/js-dynamic-function)更直观的参数名称和声明方式如 `isSupported` 和 `runner` 配置项
 
 **注意：使用 `Api` 生成的自定义交互不受 `bridge.config.support` 的影响**
 
@@ -125,7 +127,7 @@ bridge.call('test3', 1, 2) // log '3, 5' 由下到上执行，所以并不是 '4
 
 ```javascript
 ...
-import { Api } from 'jsbridge-adapter'
+import { Api } from 'js-bridge-adapter'
 ...
 
 const test = new Api((a, b) => a + b)
@@ -143,7 +145,7 @@ bridge.call('test', 1, 2) // 3
 
 ```javascript
 ...
-import { Api } from 'jsbridge-adapter'
+import { Api } from 'js-bridge-adapter'
 ...
 let isReady = false
 
@@ -196,11 +198,11 @@ isReady = true
 test() // warn '你可能忘了提供执行体'
 ```
 
-### <div id="apidynamicfunctionmode"/> `Api` 的动态函数模式
+### <div id="apidynamicfunctionmode"/> `Api` 的[动态函数](https://github.com/CJY0208/js-dynamic-function)模式
 
-使用 `getRunner` 配置以启用动态函数模式
+使用 `getRunner` 配置以启用[动态函数](https://github.com/CJY0208/js-dynamic-function)模式
 
-**注意：当使用动态函数模式时，`isSupported` 和 `runner` 将不生效**
+**注意：当使用[动态函数](https://github.com/CJY0208/js-dynamic-function)模式时，`isSupported` 和 `runner` 将不生效**
 
 ```javascript
 ...
@@ -235,7 +237,7 @@ test(1, 2) // 3
 ```javascript
 ...
 import compareVerions from 'compare-versions'
-import { Api } from 'jsbridge-adapter'
+import { Api } from 'js-bridge-adapter'
 ...
 
 // 此处假设原生版本号
@@ -252,7 +254,7 @@ version = '1.2.1'
 test.isSupported() // true
 ```
 
-接下来，在了解了[动态函数](#dynamicfunction)、以及 `Api` 的[动态函数模式](#apidynamicfunctionmode)后，我们可以实现完全的版本控制
+接下来，在了解了[动态函数](https://github.com/CJY0208/js-dynamic-function)、以及 `Api` 的[动态函数模式](#apidynamicfunctionmode)后，我们可以实现完全的版本控制
 
 ```javascript
 window.AndroidBridge = {
@@ -407,7 +409,7 @@ test(1, 2) // 3
 生成一个随机的、唯一的 id 值
 
 ```javascript
-import { uniqueId } from 'jsbridge-adapter'
+import { uniqueId } from 'js-bridge-adapter'
 ```
 
 生成规则如下
@@ -426,7 +428,7 @@ const uniqueId = (prefix = '') =>
 将局部函数转为全局函数，执行后得到生成的全局函数名，默认全局函数名通过 `uniqueId()` 生成
 
 ```javascript
-import { globalize } from 'jsbridge-adapter'    
+import { globalize } from 'js-bridge-adapter'    
 
 let localFunc = (a, b) => a + b
 
