@@ -1,58 +1,50 @@
-import { isFunction } from '../helpers/is'
-const parseConfig = config => {
-  if (typeof config === 'function') {
-    return {
-      getExecutor: config
-    }
+const isFunction = value => typeof value === 'function'
+const isPromise = value => !!value && isFunction(value.then)
+const parseConfig = (p1, p2) => {
+  switch (typeof p1) {
+    case 'string':
+      return {
+        name: p1,
+        getExecutor: p2
+      }
+    case 'function':
+      return {
+        getExecutor: p1
+      }
+    case 'object':
+    default:
+      return p1
+  }
+}
+export const gen = (getExecutor, valuer) =>
+  function(...args) {
+    let executor = getExecutor.apply(this, args)
+
+    return isPromise(executor)
+      ? new Promise(resolve =>
+          executor.then(executor =>
+            resolve(valuer.call(this, executor, ...args))
+          )
+        )
+      : valuer.call(this, executor, ...args)
   }
 
-  return config
-}
-
 export default class DynamicFunction {
-  constructor(config) {
-    const { name = '', getExecutor } = parseConfig(config)
+  constructor(...config) {
+    const { name = '', getExecutor } = parseConfig(...config)
 
-    const func = {
-      [name](...args) {
-        const executor = getExecutor.apply(this, args)
-
-        if (!isFunction(executor)) {
-          return
-        }
-
-        return executor.apply(this, args)
-      }
-    }[name]
-
-    const commonPropertyProps = {
-      configurable: true,
-      enumerable: false
-    }
-
-    Object.defineProperty(func, 'name', {
-      value: name,
-      writable: false,
-      ...commonPropertyProps
-    })
-
-    Object.defineProperty(func, 'length', {
-      ...commonPropertyProps,
-      get() {
-        const executor = getExecutor()
-
-        if (!isFunction(executor)) {
-          return -1
-        }
-
-        return executor.length
-      }
+    const func = gen(getExecutor, function(executor, ...args) {
+      return isFunction(executor) ? executor.apply(this, args) : undefined
     })
 
     func.getExecutor = getExecutor
-    func.isExecutable = function(...args) {
-      return isFunction(getExecutor.apply(this, args))
-    }
+    func.isExecutable = gen(getExecutor, executor => isFunction(executor))
+    func.getName = gen(getExecutor, executor =>
+      name ? name : isFunction(executor) ? executor.name : ''
+    )
+    func.getLength = gen(getExecutor, executor =>
+      isFunction(executor) ? executor.length : undefined
+    )
 
     return func
   }

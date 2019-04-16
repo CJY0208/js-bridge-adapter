@@ -56,6 +56,7 @@ describe('集成测试 / README / 交互的版本控制', () => {
       api: key => (...args) => AndroidBridge[key](...args)
     })
 
+    let isReady = false
     let version = '1.0.1'
     // 假设 bridge 未就绪
 
@@ -63,7 +64,7 @@ describe('集成测试 / README / 交互的版本控制', () => {
       test: new Api({
         getRunner() {
           // bridge 未就绪时不支持
-          if (!bridge.isReady) {
+          if (!isReady) {
             return null
           }
 
@@ -91,7 +92,7 @@ describe('集成测试 / README / 交互的版本控制', () => {
         bridge.support('test') // false，因为 bridge 未就绪
       ).to.be.equal(false)
 
-      bridge.ready()
+      isReady = true
       expect(
         bridge.support('test') // false 因为版本号条件未满足
       ).to.be.equal(false)

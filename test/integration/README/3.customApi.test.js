@@ -17,15 +17,12 @@ describe('集成测试 / README / 自定义交互', () => {
     })
 
     bridge.register({ test })
-    // 此处假设 bridge 仍未就绪
-    // 使用 Api 生成的自定义交互不受 bridge.isReady 状态的影响
+    // 使用 Api 生成的自定义交互不受 bridge.config.support 的影响
 
-    it('bridge.support 支持性检测正常，不受 bridge.isReady 影响', () => {
-      expect(bridge.isReady).to.be.equal(false)
+    it('bridge.support 支持性检测正常，不受 bridge.config.support 的影响', () => {      
       expect(bridge.support('test')).to.be.equal(true)
     })
-    it('bridge.call 可正常执行，不受 bridge.isReady 影响', () => {
-      expect(bridge.isReady).to.be.equal(false)
+    it('bridge.call 可正常执行，不受 bridge.config.support 的影响', () => {      
       expect(bridge.call('test', 1, 2)).to.be.equal(3)
     })
   })
@@ -33,8 +30,10 @@ describe('集成测试 / README / 自定义交互', () => {
   describe('设置 isSupported 支持检测器', () => {
     const bridge = new Bridge()
 
+    let isReady = false
+
     const test = new Api({
-      isSupported: () => bridge.isReady,
+      isSupported: () => isReady,
       runner: (a, b) => a + b
     })
 
@@ -56,7 +55,7 @@ describe('集成测试 / README / 自定义交互', () => {
     })
     describe('isSupported 条件满足时', () => {
       it('api.isSupported() 应为 true', () => {
-        bridge.ready()
+        isReady = true
         expect(test.isSupported()).to.be.equal(true)
       })
       it('api() 应正常执行', () => {
@@ -93,18 +92,20 @@ describe('集成测试 / README / 自定义交互', () => {
 
       const orinalDefaultConfig = Object.assign({}, Api.default)
 
-      Api.default.isSupported = () => bridge.isReady
+      let isReady = false
+
+      Api.default.isSupported = () => isReady
       Api.default.runner = () => '你可能忘了提供执行体'
 
       const test = new Api()
       expect(test.isSupported()).to.be.equal(false) // false
 
-      bridge.ready()
+      isReady = true
       expect(test()).to.be.equal('你可能忘了提供执行体') // warn '你可能忘了提供执行体'
 
       // 恢复 Api.default 以保证后续测试行为正常
       Api.default = orinalDefaultConfig
-      bridge.isReady = false
+      isReady = false
 
       const test2 = new Api(() => 'yeah')
       expect(test2.isSupported()).to.be.equal(true) // true
@@ -117,10 +118,11 @@ describe('集成测试 / README / 自定义交互', () => {
 
     let getRunnerTimes = 0
     let runnerTimes = 0
+    let isReady = false
     const test = new Api({
       getRunner() {
         getRunnerTimes++
-        if (!bridge.isReady) {
+        if (!isReady) {
           return null
         }
 
@@ -146,7 +148,7 @@ describe('集成测试 / README / 自定义交互', () => {
 
     describe('getRunner 返回函数时', () => {
       it('api.isSupported() 应为 true', () => {
-        bridge.ready()
+        isReady = true
         expect(test.isSupported()).to.be.equal(true)
         expect(getRunnerTimes).to.be.equal(3)
         expect(runnerTimes).to.be.equal(0)

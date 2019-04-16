@@ -15,13 +15,15 @@ describe('集成测试 / README / 基础示例', () => {
     }
   }
 
+  let isReady = false
+
   const bridge = new Bridge('android')
 
   // 此处配置 bridge 对象如何对接 native 端，主要为以下两点
   // 1、如何做支持检测
   // 2、如何执行
   bridge.config({
-    support: key => typeof AndroidBridge[key] !== 'undefined',
+    support: key => isReady && key in AndroidBridge,
     api: key => (...args) => AndroidBridge[key](...args)
   })
 
@@ -30,9 +32,7 @@ describe('集成测试 / README / 基础示例', () => {
   bridge.register({ login })
 
   describe('bridge 未就绪时', () => {
-    it('bridge.isReady 应为 false', () => {
-      expect(bridge.isReady).to.be.equal(false)
-    })
+    
     it('login.isSupported() 应为 false', () => {
       expect(
         login.isSupported() // false
@@ -54,12 +54,8 @@ describe('集成测试 / README / 基础示例', () => {
   })
 
   describe('bridge 就绪后', () => {
-    it('bridge.isReady 应为 true', () => {
-      // 声明 bridge 已就绪，模拟 native 环境下 bridge 延时就绪的情况
-      bridge.ready()
-      expect(bridge.isReady).to.be.equal(true)
-    })
     it('login.isSupported() 应为 true', () => {
+      isReady = true
       expect(
         login.isSupported() // true
       ).to.be.equal(true)

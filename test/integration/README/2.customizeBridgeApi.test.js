@@ -13,7 +13,7 @@ describe('集成测试 / README / 定制交互的执行方式', () => {
   const bridge = new Bridge('android')
 
   bridge.config({
-    support: key => typeof AndroidBridge[key] !== 'undefined',
+    support: key => key in AndroidBridge,
     api: key => (...args) => AndroidBridge[key](...args)
   })
 
@@ -38,7 +38,7 @@ describe('集成测试 / README / 定制交互的执行方式', () => {
       .customize(runner => (param1, param2) => runner(param1 + 1, param2 + 1))
   })
 
-  bridge.ready() // 不要忘记这一句
+  
   it('未作定制的交互', () => {
     expect(bridge.call('test', 1, 2)).to.be.equal('1, 2')
   })

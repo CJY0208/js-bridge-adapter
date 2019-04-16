@@ -40,11 +40,14 @@ import Bridge from 'jsbridge-adapter'
 
 const bridge = new Bridge('android')
 
+// 模拟 native 环境下 bridge 延时就绪的情况
+let isReady = false
+
 // 此处配置 bridge 对象如何对接 native 端，主要为以下两点
 // 1、如何做支持检测
 // 2、如何执行
 bridge.config({
-  support: key => typeof window.AndroidBridge[key] !== 'undefined',
+  support: key => isReady && key in window.AndroidBridge,
   api: key => (...args) => window.AndroidBridge[key](...args)
 })
 
@@ -56,9 +59,8 @@ bridge.register({
 bridge.support('login') // false
 bridge.call('login', res => console.log(res)) // 调用无反应
 
-// 声明 bridge 已就绪，模拟 native 环境下 bridge 延时就绪的情况
-bridge.ready()
-
+// bridge 就绪后
+isReady = true
 bridge.support('login') // true
 bridge.call('login', res => console.log(res)) // log 'login success'
 ```
@@ -80,7 +82,6 @@ window.AndroidBridge = {
 ```
 ```javascript
 ...
-// 假设 bridge 未就绪
 
 bridge.register({
   test: bridge.api('androidTest'), // 不做处理
@@ -106,7 +107,6 @@ bridge.register({
     )
 })
 
-bridge.ready() // 不要忘记这一句
 bridge.call('test', 1, 2) // log '1, 2'
 bridge.call('test1', 1, 2) // log '2, 3'
 bridge.call('test2', 1, 2) // log '2, 1'
@@ -115,69 +115,11 @@ bridge.call('test3', 1, 2) // log '3, 5' 由下到上执行，所以并不是 '4
 
 - - -
 
-## <div id="dynamicfunction"/> 动态函数
-
-在实现 **自定义交互** 及对 **版本控制** 之前，需要先了解该适配器中 **动态函数** 的概念
-
-动态函数是一种特殊的函数，在函数执行前，需要先获取函数执行体，如果获得的执行体为非函数，则动态函数将不执行
-
-同时，动态函数拥有一个方法 `isExecutable` 用以检测动态函数是否可以被执行
-
-动态函数的粗略实现如下
-
-```javascript
-const isFunction = value => typeof value === 'function'
-
-function DynamicFunction(getExecutor) {
-  
-  const func = (...args) => {
-    const executor = getExecutor(...args)
-
-    if (!isFunction(executor)) {
-      return
-    }
-
-    return executor(...args)
-  }
-
-  func.isExecutable = (...args) => isFunction(getExecutor(...args))
-
-  return func
-}
-```
-
-```javascript
-let flag = false
-
-const dynamicFunc = new DynamicFunction(() => {
-  if (!flag) {
-    return null
-  }
-
-  return (a, b) => a + b
-})
-
-dynamicFunc.isExecutable() // false
-dynamicFunc(1, 2) // 无反应
-
-flag = true
-dynamicFunc.isExecutable() // true
-dynamicFunc(1, 2) // 3
-
-flag = false
-dynamicFunc.isExecutable() // false
-dynamicFunc(1, 2) // 无反应
-```
-
-接下来，我们借助动态函数的特性，来实现自定义交互及对交互进行版本控制
-
-- - -
-
 ## <div id="customize" /> 自定义交互
 
 `Api` 是一个封装过后的动态函数，它具有更直观的参数名称
 
-**注意：使用 `Api` 生成的自定义交互不受 `bridge.isReady` 状态的影响**
+**注意：使用 `Api` 生成的自定义交互不受 `bridge.config.support` 的影响**
 
 基本使用方式如下
 
@@ -192,8 +134,7 @@ test.isSupported() // true
 test(1, 2) // 3
 
 bridge.register({ test })
-// 此处假设 bridge 仍未就绪
-// 使用 Api 生成的自定义交互不受 bridge.isReady 状态的影响
+
 bridge.support('test') // true
 bridge.call('test', 1, 2) // 3
 ```
@@ -204,10 +145,10 @@ bridge.call('test', 1, 2) // 3
 ...
 import { Api } from 'jsbridge-adapter'
 ...
-// 假设 bridge 未就绪
+let isReady = false
 
 const test = new Api({
-  isSupported: () => bridge.isReady,
+  isSupported: () => isReady,
   runner: (a, b) => a + b
 })
 
@@ -218,7 +159,7 @@ test(1, 2) // 无反应
 bridge.support('test') // false
 bridge.call('test', 1, 2) // 无反应
 
-bridge.ready()
+isReady = true
 test.isSupported() // true
 test(1, 2) // 3
 bridge.support('test') // true
@@ -243,13 +184,15 @@ bridge.support('test') // false
 ...
 // 假设 bridge 尚未就绪
 
-Api.default.isSupported = () => bridge.isReady
+let isReady = false
+
+Api.default.isSupported = () => isReady
 Api.default.runner = () => console.warn('你可能忘了提供执行体')
 
 const test = new Api()
 test.isSupported() // false
 
-bridge.ready()
+isReady = true
 test() // warn '你可能忘了提供执行体'
 ```
 
@@ -257,17 +200,15 @@ test() // warn '你可能忘了提供执行体'
 
 使用 `getRunner` 配置以启用动态函数模式
 
-重温[动态函数](#dynamicfunction)的定义：在执行前，需先获取函数执行体，如果获得的执行体为非函数，则动态函数将不执行
-
 **注意：当使用动态函数模式时，`isSupported` 和 `runner` 将不生效**
 
 ```javascript
 ...
-// 假设 bridge 尚未就绪
+let isReady = false
 
 const test = new Api({
   getRunner() {
-    if (!bridge.isReady) {
+    if (!isReady) {
       return null
     }
 
@@ -278,7 +219,7 @@ const test = new Api({
 test.isSupported() // false
 test(1, 2) // 没反应
 
-bridge.ready()
+isReady = true
 test.isSupported() // true
 test(1, 2) // 3
 ```
@@ -323,14 +264,14 @@ window.AndroidBridge = {
 ```javascript
 ...
 let version = '1.0.1'
-// 假设 bridge 未就绪
+let isReady = false
 
 bridge.register({
   test: new Api({
     getRunner() {
       
       // bridge 未就绪时不支持
-      if (!bridge.isReady) {
+      if (!isReady) {
         return null
       }
 
@@ -356,7 +297,7 @@ bridge.register({
 
 bridge.support('test') // false，因为 bridge 未就绪
 
-bridge.ready()
+isReady = true
 bridge.support('test') // false 因为版本号条件未满足
 
 version = '1.2.0'
@@ -368,6 +309,63 @@ bridge.call('test', 1, 2) // log '2 1
 
 version = '1.3.3'
 bridge.support('test') // false 因为版本号条件未满足
+```
+
+- - -
+
+## 异步检测
+
+当 `bridge.config.support` 为异步函数时，`bridge.support/call` 方法均为异步
+
+```javascript
+...
+
+const delay = time => new Promise(resolve => setTimeout(resolve, time))
+
+const TestBridge = {
+  test() {
+    return 'Test Log'
+  }
+}
+
+const bridge = new Bridge()
+
+bridge.config({
+  support: async api => {
+    await delay(1000)
+    return api in TestBridge
+  },
+  api: key => (...args) => TestBridge[key](...args)
+})
+
+const test = bridge.api('test')
+
+bridge.register({ test })
+
+await bridge.support('test') // log 'true' after 1000ms
+await test.isSupported() // log 'true' after 1000ms
+
+await bridge.call('test') // log 'Test Log' after 1000ms
+await test() // log 'Test Log' after 1000ms
+```
+
+同时，`Api` 与 `DynamicFunction` 函数享有类似的异步功能
+
+```javascript
+...
+
+const delay = time => new Promise(resolve => setTimeout(resolve, time))
+
+const test = new Api({
+  getRunner: async () => {
+    await delay(1000)
+
+    return (a, b) => a + b
+  }
+})
+
+await test.isSupported() // log 'true' after 1000ms
+await test(1, 2) // log '3' after 1000ms
 ```
 
 - - -

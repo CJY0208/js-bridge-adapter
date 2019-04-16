@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup --config",
-    "test": "mocha \"./test/**/*.test.js\"",
-    "test:target": "mocha "
+    "test": "mocha --time 5000 --slow 2000 \"./test/**/*.test.js\"",
+    "test:target": "mocha --time 5000 --slow 2000 "
   },
   "keywords": [
     "jsBridge",
