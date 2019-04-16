@@ -1,5 +1,5 @@
 import { get } from '../helpers/try'
-import { isFunction, isPromise } from '../helpers/is'
+import { isFunction } from '../helpers/is'
 import DynamicFunction, { gen } from '../helpers/DynamicFunction'
 
 const parseConfig = config => {

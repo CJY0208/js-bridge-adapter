@@ -8,7 +8,8 @@ export default [
     output: {
       name: 'JsBridgeAdapter',
       file: 'dist/JsBridgeAdapter.min.js',
-      format: 'umd'
+      format: 'umd',
+      exports: 'named'
     },
     plugins: [
       resolve(),
@@ -23,7 +24,8 @@ export default [
     output: {
       name: 'JsBridgeAdapter',
       file: 'dist/JsBridgeAdapter.js',
-      format: 'umd'
+      format: 'umd',
+      exports: 'named'
     },
     plugins: [
       resolve(),
