@@ -1,6 +1,7 @@
+import DynamicFunction, { gen } from 'js-dynamic-function'
+
 import { get } from '../helpers/try'
 import { isFunction } from '../helpers/is'
-import DynamicFunction, { gen } from '../helpers/DynamicFunction'
 
 const parseConfig = config => {
   if (typeof config === 'function') {

@@ -1,6 +1,7 @@
+import { gen } from 'js-dynamic-function'
+
 import { get, run } from '../helpers/try'
 import { isFunction } from '../helpers/is'
-import { gen } from '../helpers/DynamicFunction'
 import Api from './Api'
 
 export default class Bridge {

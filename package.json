@@ -11,7 +11,9 @@
   "keywords": [
     "jsBridge",
     "js bridge",
-    "bridge adapter"
+    "adapter",
+    "bridge adapter",
+    "register js bridge"
   ],
   "author": "CJY0208",
   "license": "ISC",
@@ -31,5 +33,8 @@
     "rollup-plugin-babel": "^3.0.5",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-uglify": "^4.0.0"
+  },
+  "dependencies": {
+    "js-dynamic-function": "^0.0.1"
   }
 }

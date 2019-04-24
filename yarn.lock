@@ -989,6 +989,10 @@ isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
 
+js-dynamic-function@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/js-dynamic-function/-/js-dynamic-function-0.0.1.tgz#52cece66e1b5505ef7f7e1638f1b1e0d66365a7c"
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"

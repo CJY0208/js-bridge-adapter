@@ -11,6 +11,7 @@ export default [
       format: 'umd',
       exports: 'named'
     },
+    external: ['js-dynamic-function'],
     plugins: [
       resolve(),
       babel({
@@ -27,6 +28,7 @@ export default [
       format: 'umd',
       exports: 'named'
     },
+    external: ['js-dynamic-function'],
     plugins: [
       resolve(),
       babel({
