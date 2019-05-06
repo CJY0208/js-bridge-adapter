@@ -53,7 +53,7 @@ export default class Bridge {
     return bridgeRunner
   }
 
-  support = key => run(this.apis, `${key}.isSupported`)
+  support = key => this.has(key) && run(this.apis, `${key}.isSupported`)
   has = key => key in this.apis
   get = key => get(this.apis, key)
   call = (key, ...args) => {
@@ -62,7 +62,7 @@ export default class Bridge {
     }"`
     const notSupportedTips = `[Not Supported] Api "${key}" is not supported by Bridge "${
       this.name
-    }`
+    }"`
 
     if (!this.has(key)) {
       return this.log('warn', unregisteredTips)

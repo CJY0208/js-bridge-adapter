@@ -376,7 +376,7 @@ await test(1, 2) // log '3' after 1000ms
 
 ### **`bridge.has(apiName)`**
 
-检测 `bridge` 中某交互是否已注册
+检测 `bridge` 中交互是否已注册
 
 ```javascript
 ...
@@ -390,7 +390,7 @@ bridge.has('test2') // false
 
 ### **`bridge.get(apiName)`**
 
-获取 `bridge` 中交互的执行体
+获取 `bridge` 中已注册交互的执行体
 
 ```javascript
 ...

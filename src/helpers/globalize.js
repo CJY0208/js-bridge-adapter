@@ -14,8 +14,6 @@ const getGlobal = () => {
   throw new Error('unable to locate global object')
 }
 
-const globalThis = getGlobal()
-
 const globalize = (
   handler,
   { name = uniqueId('__globalFunction'), once = false } = {}
@@ -24,9 +22,9 @@ const globalize = (
     return handler
   }
 
-  globalThis[name] = (...args) => {
+  getGlobal()[name] = (...args) => {
     if (once) {
-      delete globalThis[name]
+      delete getGlobal()[name]
     }
 
     if (isFunction(handler)) {
@@ -38,5 +36,7 @@ const globalize = (
 
   return name
 }
+
+globalize.getGlobal = getGlobal
 
 export default globalize

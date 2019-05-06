@@ -1,4 +1,4 @@
-import { isString, isExist, isUndefined, isFunction } from '../is'
+import { isString, isUndefined, isFunction } from '../is'
 
 export const get = (obj, keys = [], defaultValue) => {
   try {
@@ -20,9 +20,3 @@ export const run = (obj, keys = [], ...args) => {
 
   return isFunction(func) ? func.call(context, ...args) : func
 }
-
-export const value = (...values) =>
-  values.reduce(
-    (value, nextValue) => (isUndefined(value) ? run(nextValue) : run(value)),
-    undefined
-  )
