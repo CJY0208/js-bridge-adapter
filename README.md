@@ -1,5 +1,7 @@
 # JsBridgeAdapter
 
+![](https://visitor-badge.glitch.me/badge?page_id=cjy0208.js-bridge-adapter)
+
 `web` 端 `bridge` 适配器，适用于对接任意 `native` 端 `bridge` 方案
 
 基于[动态函数](https://github.com/CJY0208/js-dynamic-function)制作
