@@ -8,6 +8,14 @@
 
 - - -
 
+## 安装
+
+```bash
+yarn add js-bridge-adapter
+# or 
+npm install js-bridge-adapter --save
+```
+
 ## 目的
 
 市面上的 `jsBridge` 方案大多为 `native` 端方案，缺乏 `web` 端对接 `native` 的方案
